@@ -45,7 +45,9 @@ word의 각 letter를 iterate하면서 존재하면 따라가고 존재하지 �
 마지막 letter의 node에 독립적인 단어를 나타내는 변수를 마킹해준다
 
 ### search
-array로 구현되어 있다면 
-
+array로 구현되어 있다면 search할 단어의 각 letter를 iterate하면서 해당 letter의 index 위치의 link가 null인지 또는 child가 있는지 확인하면 될 것이다  
+* null을 만나면 false를 return하고  
+* 마지막 letter까지 iterate했을 때 node에 독립 단어를 나타내는 마킹이 있으면 true, 없으면 false를 반환하면 될 것이다.
 
 ### deletetion
+삭제는 

@@ -5,6 +5,8 @@ using namespace std;
 
 /*
  * this is example code is from the book "알고리즘2" 
+ * 사실 코드만 봐서는 잘 이해가 안될 수 있으니 나중에 직관적인 이미지를 첨부하겠다.
+ * 또는 algorithm visualization 찾아보면 좋다.
  */
 
 

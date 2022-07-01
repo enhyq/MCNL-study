@@ -44,10 +44,27 @@ linked list는 자신의 value, 그리고 link 2개로 구성되기 때문에 co
 word의 각 letter를 iterate하면서 존재하면 따라가고 존재하지 않으면 생성한후 따라간다
 마지막 letter의 node에 독립적인 단어를 나타내는 변수를 마킹해준다
 
+insertion에서 letter가 이미 존재하는지 존재하지 않는지 확인하는 더 빠른 방법이 일을까? -> hash table?? 
+
+
 ### search
 array로 구현되어 있다면 search할 단어의 각 letter를 iterate하면서 해당 letter의 index 위치의 link가 null인지 또는 child가 있는지 확인하면 될 것이다  
 * null을 만나면 false를 return하고  
 * 마지막 letter까지 iterate했을 때 node에 독립 단어를 나타내는 마킹이 있으면 true, 없으면 false를 반환하면 될 것이다.
 
 ### deletetion
-삭제는 
+삭제는 귀찮다면..(?) 그냥 독립 단어 마킹만 false로 해주면 될 것이다.
+
+하지만 메모리를 효율적으로 관리해야 한다면..
+
+삭제를 하고 따라 올라오면서 a-z까지의 array의 모든 node들이 null인 경우 해당 array를 free시키면 될 것 같다.
+
+
+### {variables}
+구현을 하는데 필요한 변수들은 
+root
+characterValue struct
+
+위 struct를 배열 형식으로 사용하려면 크기를 미리 26으로 맞추고 하면 되고 아니면 linked list 형태로 사용하면 될 것 같다
+
+linked list 형태를 사용한다고 하면 int 순서나 알파벳 순서로 link를 걸어 놓는 것도 좋을 방법인듯 하다

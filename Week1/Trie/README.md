@@ -68,3 +68,7 @@ characterValue struct
 위 struct를 배열 형식으로 사용하려면 크기를 미리 26으로 맞추고 하면 되고 아니면 linked list 형태로 사용하면 될 것 같다
 
 linked list 형태를 사용한다고 하면 int 순서나 알파벳 순서로 link를 걸어 놓는 것도 좋을 방법인듯 하다
+
+
+### Questions
+* does Trie needs to be alphabetically sorted?

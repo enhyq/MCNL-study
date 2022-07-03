@@ -71,4 +71,4 @@ linked list 형태를 사용한다고 하면 int 순서나 알파벳 순서로 l
 
 
 ### Questions
-* does Trie needs to be alphabetically sorted?
+* do the nodes in Trie needs to be alphabetically sorted?

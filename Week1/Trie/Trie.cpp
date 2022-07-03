@@ -141,7 +141,8 @@ class enhyq::Trie {
 
     // singly linked list로 구현해서 deletion이 좀 어려울 것 같다..
     void deletion(const string &str) {
-        // 1. start from the bottom
+        // since I used singly linked list, it might be better to use recursive function
+        // 1. reach the bottom and remove
 
         // 2. 
     }

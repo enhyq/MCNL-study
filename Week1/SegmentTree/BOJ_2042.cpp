@@ -1,21 +1,23 @@
 /**
  * @author Eunhyeok Kwon
- * @date 2022/06/30 ~ 
+ * @date 2022/06/30 ~ 2022/07/04
  * @link https://www.acmicpc.net/problem/2042
  */
 
 #include <iostream>
 #include <vector>
 
-// 각 입력의 최대 Range가 long long int 이기 때문에 더 많이 담을 수 있어야 한다.
+// 각 입력의 최대 Range가 long long TYPE 이기 때문에 더 많이 담을 수 있어야 한다.
 #define TYPE long long int
 
 using namespace std;
 
 
 /*
- * 의문점: 각 input의 Range가 long long int 인데
+ * 의문점: 각 input의 Range가 long long TYPE 인데
  * 출력 값은 왜 overflow가 허용 되는 건지?
+ * 
+ * 계산 해 보면 알겠지만 overflow가 발생하더라도 정답이 출력된다고 한다
  */
 
 
@@ -23,20 +25,22 @@ using namespace std;
 class RSQ {
     private:
     /**
-     * since number range is from -2^64 ~ 2^64, which is range of long long int
+     * since number range is from -2^64 ~ 2^64, which is range of long long TYPE
      */
-    vector<int> sumValue;
-    int arraySize;
+    vector<TYPE> sumValue;
+    TYPE arraySize;
 
     /**
      * actual initialization function 
      */
-    int init(vector<int> &array, int node, int left, int right) {
+    TYPE init(vector<TYPE> &array, TYPE node, TYPE left, TYPE right) {
         if(left == right) return sumValue[node] = array[left];
         else {
-            int mid = (left + right) / 2;
-            int leftValue = init(array, node*2, left, mid);
-            int rightValue = init(array, node*2+1, mid + 1, right);
+            TYPE mid = (left + right) / 2;
+
+            // 여기도 TYPE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            TYPE leftValue = init(array, node*2, left, mid);
+            TYPE rightValue = init(array, node*2+1, mid + 1, right);
             return sumValue[node] = leftValue + rightValue;
         }
     }
@@ -44,7 +48,7 @@ class RSQ {
     /**
      * finds the sum of the values in the range (left, right)
      */
-    int query(int left, int right, int node, int nodeLeft, int nodeRight) {        
+    TYPE query(TYPE left, TYPE right, TYPE node, TYPE nodeLeft, TYPE nodeRight) {        
         if(left > nodeRight || right < nodeLeft) {
             // cout << nodeLeft << "~" << nodeRight << " " << 0 << endl;
             return 0; 
@@ -54,9 +58,9 @@ class RSQ {
             return sumValue[node];
         }  // if nodeRange is inside Range
         
-        int mid = (nodeLeft + nodeRight) / 2;
-        int leftValue = query(left, right, node*2, nodeLeft, mid);
-        int rightValue = query(left, right, node*2+1, mid+1, nodeRight);
+        TYPE mid = (nodeLeft + nodeRight) / 2;
+        TYPE leftValue = query(left, right, node*2, nodeLeft, mid);
+        TYPE rightValue = query(left, right, node*2+1, mid+1, nodeRight);
         
         // cout << nodeLeft << "~" << nodeRight << " " << leftValue + rightValue << endl;
         return leftValue + rightValue;
@@ -65,31 +69,34 @@ class RSQ {
     /**
      * modify leaf node value and its ancestor segments
      */
-    int modify(int index, int newValue, int node, int left, int right) {
-        int difference;
+    TYPE modify(TYPE index, TYPE newValue, TYPE node, TYPE left, TYPE right) {
+        TYPE difference; // 여기 difference 또한 long long TYPE 타입이다 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // 위dp type이라고 안쓰고 TYPE 라고 써서 여기서 너무 시간 낭비했다...
         if(left == right) {
             difference = newValue - sumValue[node];
+            // cout << "difference: " << difference << "\n";
             sumValue[node] = newValue;
             return difference;
         }
         
-        int mid = (left + right) / 2;
+        TYPE mid = (left + right) / 2;
+
         if(index <= mid)
             difference = modify(index, newValue, node*2, left, mid);
         else
-            difference = modify(index, newValue, node*2+1, mid + 1, right);
+            difference = modify(index, newValue, node*2+1, mid+1, right);
         
         sumValue[node] += difference;
         return difference;
     }
 
     // for debugging
-    void print(int node, int left, int right) {
+    void print(TYPE node, TYPE left, TYPE right) {
         cout << sumValue[node] << " ";
 
         if(left == right) return;
 
-        int mid = (left + right) / 2;
+        TYPE mid = (left + right) / 2;
         print(node*2, left, mid);
         print(node*2+1, mid + 1, right);
     }
@@ -101,19 +108,19 @@ class RSQ {
      * 
      * @param array 
      */
-    RSQ(vector<int> &array) {
+    RSQ(vector<TYPE> &array) {
         arraySize = array.size();
-        int segmentTreeSize = arraySize * 4;
+        TYPE segmentTreeSize = arraySize * 4;
         sumValue.resize(segmentTreeSize);
         init(array, 1, 0, arraySize-1);
     }
  
-    int query(int left, int right) {
+    TYPE query(TYPE left, TYPE right) {
         return query(left, right, 1, 0, arraySize-1);
     }
 
-    void modify(int index, int newValue) {
-        if(index < 0 || arraySize-1 < index) return; // if modify index is out of range
+    void modify(TYPE index, TYPE newValue) {
+        if(index < 0 || arraySize-1 < index) return; // if modify index is out of range, don't do anything
         modify(index, newValue, 1, 0, arraySize - 1);
     }
 
@@ -125,21 +132,28 @@ class RSQ {
     // DELETE는 문제에서 요구하지 않으니...
 };
 
-int main(int argc, char const *argv[])
+int main(TYPE argc, char const *argv[])
 {
-    /* code */
+    /* cin, cout fix */
+    ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+
     /*
      * N: number of numbers
      * K: number of modification
      * M: number of queries
      */
     // K, M을 알 필요가 있나?
-    int N, K, M;
+    TYPE N, K, M;
+    /*
+     * 0 ≤ N ≤ 1,000,000
+     * 1 ≤ M ≤ 10,000
+     * 1 ≤ K ≤ 10,000
+     */
     cin >> N >> K >> M;
 
-    vector<int> array;
-    int tempNum;
-    int i;
+    vector<TYPE> array;
+    TYPE tempNum;
+    TYPE i;
     for(i=0; i<N; i++) {
         cin >> tempNum;
         array.push_back(tempNum);
@@ -147,7 +161,8 @@ int main(int argc, char const *argv[])
 
     RSQ rsq(array);
 
-    int o1, o2, o3; // 입력의 index는 1부터 시작한다!!
+    // 입력의 index는 1부터 시작한다!!
+    TYPE o1, o2, o3; // o3은 newValue를 입력 받을 때도 사용되기 때문에
     for(i=0; i<K+M; i++) {
         // rsq.printAll();
         cin >> o1 >> o2 >> o3;
@@ -155,7 +170,7 @@ int main(int argc, char const *argv[])
             rsq.modify(o2-1, o3);
         }
         else {  // option == 2; query
-            cout << rsq.query(o2-1, o3-1) << endl;
+            cout << rsq.query(o2-1, o3-1) << "\n";
         }
     }
 
@@ -163,5 +178,4 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-
-// 도대체 어디서 틀렸는지 모르겠다
+// 그래도 틀렸다..

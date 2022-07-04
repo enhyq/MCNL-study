@@ -140,18 +140,69 @@ class enhyq::Trie {
 
 
     // singly linked list로 구현해서 deletion이 좀 어려울 것 같다..
+    // 
     void deletion(const string &str) {
         // since I used singly linked list, it might be better to use recursive function
-        // 1. reach the bottom and remove
 
-        // 2. 
+        // do search first, to ensure that the word to delete exist in this trie
+
+        // travel down recursive
+        // longest word is about 25 letters? so recursive should be fine(..???)
+
+        // 1. reach the end letter of the word
+        //   a. if the end of the word doesn't have child -> return NULL
+        //      i. if sibling exist -> delete node and return sibling
+        //      ii. if no sibling -> delete node and return NULL
+        //   b. if the end of the word has child -> just set isUniqueWord to false, return node
+
     }
+
+    // input str should exist in the DS
+
+    /* 
+     * 
+     */
+    node* deletion_(node* current_node, int index, const string &str) {
+        // if current letter is the last one
+        if(str[index+1] == '\0') {
+            if(current_node->child != NULL) {   // has child
+                current_node->isUniqueWord = false;
+                return current_node;
+            }
+            else {
+                if(current_node->next) {        // no child, has next sibling
+                    
+                }
+                else {                          // no child, no next sibling
+
+                }
+            }
+        }
+        else { // not end of the word... make recursive call
+            // need to find the node with string
+
+            // 1. if next letter is direct child
+            if(current_node->value == str[index]) {
+                current_node->child = deletion_(current_node->child, index++, str);
+                return current_node;
+            }
+            // 2. if letter is one of the next sibling
+            else {
+                node *firstChild = current_node;
+                current_node->next = searchInSibling(current_node->child, str[index+1]);   
+                current_node->next = deletion_(current_node->child, index++, str);
+            }
+            
+        }
+        // 
+    }
+
 
     /*
      * prints out all the words stored in trie
      */
     void print() {
-        
+        // travel all branches in trie and print whenever isUniqueWord is true
     }
 
 };

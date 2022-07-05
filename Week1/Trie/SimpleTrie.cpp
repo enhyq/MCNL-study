@@ -1,5 +1,5 @@
 /*
- * code from "알고리즘 문제 해결 전략"
+ * code copied for reference: from "알고리즘 문제 해결 전략"
  */
 
 #include <iostream>

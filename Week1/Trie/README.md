@@ -72,3 +72,14 @@ linked list 형태를 사용한다고 하면 int 순서나 알파벳 순서로 l
 
 ### Questions
 * do the nodes in Trie needs to be alphabetically sorted?
+* yes
+
+Trie는 linked list로 구현할 수 없다.
+Indexing이 가능한 구조를 사용해야 한다.
+
+-> linked list로 된 배열?
+A - B - C - D - ...
+입력된 알파벳의 index만큼 next link로 이동...
+그럼 차라리 배열을 쓰지..
+
+결론: array 사용해야됨

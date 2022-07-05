@@ -230,3 +230,16 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
+
+
+/*
+ *
+ * 생각해 보니 이렇게 구현 하면 Trie를 사용하는 이점이 사라진다.
+ * 검색을 빠르게 하기 위해 만들었는데 children을 index로 바로 접근하지 못하고
+ * sibling들을 차례로 넘어가면서 비교해야 하기 때문에 일반적인 array를 사용하는 것 같이
+ * worst case에서는 결국 모든 문자열과 일일이 비교해 봐야 하기 때문이다.
+ * 
+ * 그래서 차라리 hashed map과 같이 indexing이 빠른 구조를 사용해야 한다.
+ * 결론적으로 Simple Trie는 메모리를 많이 사용할 수 밖에 없는 구조이다.. (?)
+ *
+ */

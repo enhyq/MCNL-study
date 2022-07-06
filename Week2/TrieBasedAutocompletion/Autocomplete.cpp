@@ -9,14 +9,11 @@
 #include <queue>            // for getting top 10 result (priority queue)
 #include <map>              // pair
 
-// need to compile with -lcurses option!
-#include <curses.h>         // cursor lib
+// need to compile with -lncurses option!
+#include <ncurses.h>         // ncurses lib
 
 
 using namespace std;
-
-#define ANSI_COLOR_DEFAULT 	"\x1b[0m"
-#define ANSI_COLOR_YELLOW   "\x1b[33m"
 
 
 // converts A-Z and space
@@ -124,15 +121,21 @@ class Trie {
 };
 
 
-int func1(){
-    initscr();
-    mvprintw(0, 0, "Hello, World"); // 화면의 0행, 0열부터 Hello, World를 출력합니다.
-    refresh(); // 화면에 출력하도록 합니다.
-    sleep(5);
-    endwin();
-    return 0;
+void initialize_ncurses() {
+    initscr();                          // initializes ncurses
+    cbreak();                           // Line buffering disabled
+    noecho();                           // no print out on screen
+    // keypad(stdscr, true);            // ???
+    mvprintw(0, 0, "(Press ESC to quit)");    // 화면의 0행, 0열부터 출력
+    mvprintw(1, 0, "Search Word: ");
+    mvprintw(2, 0, "---------------------------------------------");
+    move(1,13);
+    refresh();                          // 화면에 출력하도록 합니다
 }
 
+void terminate_ncurses() {
+    endwin();                           // restores terminal
+}
 
 
 int main(int argc, char const *argv[])
@@ -181,19 +184,32 @@ int main(int argc, char const *argv[])
         cout << data.second << " " << data.first << endl;
     }
 
-    // while(true) {
 
-    // }
-    // cbreak();
-    // getc(stdin);
-    // getchar
-    func1();
+    initialize_ncurses();
+    char ch;
+    string queryText = "";
+    // trie.find_node(ss.data()->c_str());
+    while(true) {
+        ch = getch();                               // getch has refresh() internally
+        if(ch == '\x1B') break;                     // ESC key
+        
+        if('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == ' ') {
+            queryText.push_back(ch);
+        }
+        else if(ch == '\x7F') {                     // Backspace is DEL
+            queryText.pop_back();
+        }
+        else continue;
 
-    cout << ANSI_COLOR_YELLOW << "HELLO" << endl;
-    // getch();
-    cout << "hi" << endl;
-    // getch();
-    cout << "doing well" << endl;
+        // TODO :: do something when ENTER is pressed
+
+        mvprintw(1, 13, "%s", queryText.c_str());    // row, col, str
+        clrtoeol();
+    }
+    
+    // sleep(5);
+    terminate_ncurses();
+
 	// for (int i=1;i>=0;i--) {
 	// 	cout << "Count Down : "<< i << "\r";
     //     cout << "\a" << flush;

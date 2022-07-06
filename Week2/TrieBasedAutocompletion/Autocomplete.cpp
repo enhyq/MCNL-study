@@ -78,7 +78,7 @@ class Trie {
         node *curNode = root;
         for(i=0; i<str.length(); i++) {
             idx = atoidx(str[i]);
-            if(curNode->children[idx] == NULL) {        // if letter does not exist
+            if(curNode->children[idx] == NULL) {        // if letter does not exist and has no child
                 return NULL;                            // return NULL if not found
             }
             curNode = curNode->children[idx];           // follow the child
@@ -90,8 +90,14 @@ class Trie {
     // vector[node]
     priority_queue<pair<int,string> > find_all(string str) {
         priority_queue<pair<int,string> > priority_q;           // create vector to store all possible children
-        node *curNode = find_node(str);
-        find_recur(priority_q, curNode, str);
+        if(str != "") {
+            node *curNode = find_node(str);
+            if(curNode != NULL)                                 // if find_node returns NULL
+                find_recur(priority_q, curNode, str);
+        }
+        // DEBUG PRINT
+        // cout << "hi:" << priority_q.empty() << endl;
+
         return priority_q;
     }
 
@@ -112,7 +118,7 @@ class Trie {
                 continue;
             }
             // DEBUG PRINT
-            // cout << "YES " << newStr << endl; 
+            // cout << "YES " << newStr << endl;
             find_recur(priority_q, curNode->children[i], newStr);
 
             // usleep(500);                                 // sleep microseconds
@@ -123,13 +129,21 @@ class Trie {
 
 void initialize_ncurses() {
     initscr();                          // initializes ncurses
+    if(has_colors() == false) {         // checks whether user's terminal supports colors
+        endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+    use_default_colors();
+    start_color();                      // start color
+    init_pair(1, COLOR_CYAN, -1);       // define color pair for highlight
     cbreak();                           // Line buffering disabled
     noecho();                           // no print out on screen
     // keypad(stdscr, true);            // ???
     mvprintw(0, 0, "(Press ESC to quit)");    // 화면의 0행, 0열부터 출력
     mvprintw(1, 0, "Search Word: ");
     mvprintw(2, 0, "---------------------------------------------");
-    move(1,13);
+    move(1,13);                         // input cursor position
     refresh();                          // 화면에 출력하도록 합니다
 }
 
@@ -176,6 +190,9 @@ int main(int argc, char const *argv[])
 
 
     // DEBUG CODE
+    /*
+    priority_queue<pair<int,string> > a = trie.find_all("");
+    priority_queue<pair<int,string> > b = trie.find_all("e");
     priority_queue<pair<int,string> > priority_q = trie.find_all("grape");
     for(int i=0; i<10; i++) {
         if(priority_q.empty()) break;
@@ -183,39 +200,53 @@ int main(int argc, char const *argv[])
         priority_q.pop();
         cout << data.second << " " << data.first << endl;
     }
-
+    */
 
     initialize_ncurses();
     char ch;
-    string queryText = "";
-    // trie.find_node(ss.data()->c_str());
+    string queryStr = "";
+    priority_queue<pair<int,string> > queryResult;
+    int printNum = 10, i;
+
     while(true) {
-        ch = getch();                               // getch has refresh() internally
-        if(ch == '\x1B') break;                     // ESC key
+        ch = getch();                                   // getch has refresh() internally
+        if(ch == '\x1B') break;                         // ESC key
         
         if('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == ' ') {
-            queryText.push_back(ch);
+            queryStr.push_back(ch);                     // when Alphabet key is pressed
         }
-        else if(ch == '\x7F') {                     // Backspace is DEL
-            queryText.pop_back();
+        else if(ch == '\x7F') {                         // Backspace is DEL
+            queryStr.pop_back();
         }
         else continue;
 
         // TODO :: do something when ENTER is pressed
 
-        mvprintw(1, 13, "%s", queryText.c_str());    // row, col, str
-        clrtoeol();
-    }
-    
-    // sleep(5);
-    terminate_ncurses();
+        mvprintw(1, 13, "%s", queryStr.c_str());        // row, col, str
+        clrtoeol();                                     // from current position, clear to end of line
 
-	// for (int i=1;i>=0;i--) {
-	// 	cout << "Count Down : "<< i << "\r";
-    //     cout << "\a" << flush;
-	// 	// fflush(stdout);
-    //     sleep(1);
-    // }
+        // search query string in trie
+        
+        queryResult = trie.find_all(queryStr);
+        move(3,0);                                      // output top line
+        for(i=0; i<printNum; i++) {
+            if(queryResult.empty()) break;
+            pair<int, string> data = queryResult.top();
+            
+            queryResult.pop();                          // remove top element
+
+            attron(COLOR_PAIR(1));
+            mvprintw(3+i, 0, "%s", queryStr.c_str());
+            attroff(COLOR_PAIR(1));
+
+            printw("%s", data.second.substr(queryStr.length(), data.second.length()).c_str());
+            clrtoeol();                                 // clear to end of line
+        }
+        clrtobot();                                     // clear from cursor until the last line
+        move(1,13+queryStr.length());                   // input cursor position
+
+    }
+    terminate_ncurses();
 
 
     return 0;

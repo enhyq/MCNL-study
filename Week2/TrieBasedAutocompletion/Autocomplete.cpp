@@ -19,7 +19,7 @@ using namespace std;
 // converts A-Z and space
 // upper and lower case letters are not distinguished
 int atoidx(char c) {
-    if(c == ' ') return c - 32 + 26;    // space
+    if(c == ' ') return c - 32 + 26;    // space; space comes after alphabet
     if(c < 97) return int(c) - 65;      // uppercase
     return int(c) - 97;                 // lowercase
 }
@@ -121,7 +121,7 @@ class Trie {
             // cout << "YES " << newStr << endl;
             find_recur(priority_q, curNode->children[i], newStr);
 
-            // usleep(500);                                 // sleep microseconds
+            // usleep(500);                                     // sleep microseconds
         }
     }
 };
@@ -134,9 +134,9 @@ void initialize_ncurses() {
 		printf("Your terminal does not support color\n");
 		exit(1);
 	}
-    use_default_colors();
+    use_default_colors();               // use default terminal color
     start_color();                      // start color
-    init_pair(1, COLOR_CYAN, -1);       // define color pair for highlight
+    init_pair(1, COLOR_CYAN, -1);       // define color pair for highlight, -1 means to use default
     cbreak();                           // Line buffering disabled
     noecho();                           // no print out on screen
     // keypad(stdscr, true);            // ???
@@ -186,7 +186,12 @@ int main(int argc, char const *argv[])
     else {
         cout << "Unable to open file";
         return 0;
-    }    
+    }
+
+    // TODO :: when making trie, store each word into map
+    // create hash(?) map of all the 
+
+    map<string, node*[]> suffixMap;
 
 
     // DEBUG CODE

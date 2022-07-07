@@ -354,9 +354,11 @@ int main(int argc, char const *argv[])
             move(3+i, 0);
             printw("%s", topQueryResult.second.substr(0, idxBegin).c_str());
             attron(COLOR_PAIR(1));
-            printw("%s", queryStr.c_str());
+            printw("%s", queryStrNoSpace.c_str());
             attroff(COLOR_PAIR(1));
-            printw("%s %d", topQueryResult.second.substr(idxEnd, topQueryResult.second.length()).c_str(), topQueryResult.first);
+            printw("%s", topQueryResult.second.substr(idxEnd, topQueryResult.second.length()).c_str());
+            // DEBUG PRINT
+            // printw("%s %d", topQueryResult.second.substr(idxEnd, topQueryResult.second.length()).c_str(), topQueryResult.first);
             clrtoeol();                                 // clear to end of line
         }
         clrtobot();                                     // clear from cursor until the last line
@@ -384,7 +386,5 @@ int main(int argc, char const *argv[])
 
 
 // Currently there is a bug where first word in the data file is not properlly found
-// though it is added to the trie
-
-// When two same word appear multiple times in a string
-// the highlighter doesn't work properly
+// though it is properly added to the trie (???) <- need to check this
+// I think there is problem with the recursive function finding ?

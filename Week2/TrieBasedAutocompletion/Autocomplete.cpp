@@ -21,7 +21,7 @@
 
 // need to compile with -lncurses option!
 #include <ncurses.h>         // ncurses lib
-
+// Windows OS doesn't have ncurses
 
 using namespace std;
 

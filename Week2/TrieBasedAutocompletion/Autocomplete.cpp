@@ -2,12 +2,22 @@
 #include <unistd.h>         // sleep function
 #include <string>           // for string type
 
+// strtok
+#include <stdio.h>
+#include <string.h>
+
+// istingstream
+#include <iostream>
+#include <sstream>
+
+
 #include <fstream>          // file read
 #include <iostream>         // file read
 
 #include <vector>           // vector for returning multiple found
 #include <queue>            // for getting top 10 result (priority queue)
-#include <map>              // pair
+// #include <map>              
+#include <unordered_map>    
 
 // need to compile with -lncurses option!
 #include <ncurses.h>         // ncurses lib
@@ -152,6 +162,11 @@ void terminate_ncurses() {
 }
 
 
+/*
+ * Assumes that duplicate entries does not exist in the data file
+ */
+
+
 int main(int argc, char const *argv[])
 {   
     // if usgage is wrong
@@ -166,14 +181,16 @@ int main(int argc, char const *argv[])
 
     // maybe create loading bar for reading large textfile
     // read CSV file and add to trie
-    // it will cause error if it's not CSV file -> TODO:: terminate program when error occurs
+    // it will cause error if it's not CSV format -> TODO:: terminate program when error occurs
     ifstream openFile(filePath.data());
+    string line, temp;                                  // variable for file reading
+    int score;
 	if( openFile.is_open() ){
-		string line, temp;
-        int score;
+        // CONSOLE PRINT
+        cout << "making trie..." << endl;
         while(true) {
             if(!getline(openFile, line, ',')) break;
-            getline(openFile, temp);
+            getline(openFile, temp, '\n');              // delimiter is '\n' by default
             score = stoi(temp);
             
             // DEBUG PRINT
@@ -181,17 +198,72 @@ int main(int argc, char const *argv[])
 
             trie.add(line, score);                      // add to trie
         }
-		openFile.close();
+		// openFile.close();
 	}
     else {
-        cout << "Unable to open file" << endl;
+        cout << "Unable to open file" << endl;          // if file could not be opened
         return 0;
     }
 
+    // CONSOLE PRINT
+    cout << "making word table..." << endl;
+
     // TODO :: when making trie, store each word into map
     // create hash(?) map of all the 
+    // read string from second word
+    openFile.clear();                                   // reset eof and fail flags
+    openFile.seekg(0);                                  // go to the beginning of the file
+    // map element is also accessed using first, and second keyword, like pair
+    unordered_map<string, vector<pair<int, string> > > suffixWordMap;
+    unordered_map<string, vector<pair<int, string> > >::iterator mapItr;
+    vector<pair<int, string> >::iterator vItr;
+    // ignore first word;                               // first word can be found using tree
+    while(true) {
+        if(!getline(openFile, line, ',')) break;        // get line
+        getline(openFile, temp, '\n');
+        score = stoi(temp);                             // get score of the line
 
-    map<string, node*[]> suffixMap;
+        /* Question: diff between .data() and .c_str() ? */
+       
+        string word;                                    // to store each word of line
+        bool flagFirst = true;
+        for(istringstream is(line) ; is >> word ; ) {
+            if(flagFirst) {
+                flagFirst = false;
+                continue;
+            }
+
+            /* Use trie DS just to create map and use the map for searching auto completion? */
+            /* this part only creates map for single words in the middle, no */
+
+            // search if element already in map
+            mapItr = suffixWordMap.find(word);
+            if(mapItr == suffixWordMap.end()) {            // word is not found in Map
+                // insert
+                // vector<pair<int, string> >(make_pair(score, line))
+                vector<pair<int, string> > v;
+                v.push_back(make_pair(score, line));
+                suffixWordMap.insert( make_pair( word, v )  );
+            } else {
+                // add to vector
+                // value 값인 vector에 (score, word) pair를 추가한다
+                (*mapItr).second.push_back(make_pair(score, line));
+                
+                // DEBUG PRINT
+                /****
+                cout << (*mapItr).first << " :---: ";
+                vItr = (*mapItr).second.begin();
+                while(vItr != (*mapItr).second.end()) {
+                    cout << "(" << (*vItr).first << "," << (*vItr).second << ")";
+                    vItr++;
+                }
+                cout << endl;
+                ****/
+            }
+        }
+    }
+
+    openFile.close();                                   // close file
 
 
     // DEBUG CODE
@@ -209,10 +281,10 @@ int main(int argc, char const *argv[])
 
     initialize_ncurses();
     char ch;
-    string queryStr = "";
+    string queryStr = "", currentWord, tempWord;
     priority_queue<pair<int,string> > queryResult;      // max heap by default, ordered by first in the pair
     pair<int, string> topQueryResult;
-    int printNum = 10, i;
+    int printNum = 20, i;
 
     while(true) {
         ch = getch();                                   // getch has refresh() internally
@@ -225,16 +297,33 @@ int main(int argc, char const *argv[])
             if(queryStr.length() != 0)
                 queryStr.pop_back();
         }
-        else continue;
-
+        else continue;                                  // do nothing for other keys
         // TODO :: do something when ENTER is pressed
+
+        // Find currently typing word
+        for(istringstream is(queryStr) ; is >> tempWord ; ) {
+            currentWord = tempWord;
+        }
+        if(queryStr.length() == 0) currentWord.clear(); // clear currentWord when there is no queryStr
+        
+        // DEBUG PRINT
+        // mvprintw(0, 21, "%s", currentWord.c_str()); clrtoeol();
 
         mvprintw(1, 13, "%s", queryStr.c_str());        // row, col, str
         clrtoeol();                                     // from current position, clear to end of line
 
         // search query string in trie
-        
         queryResult = trie.find_all(queryStr);
+        
+        // if data file does not contain duplicate words, there will be no duplicate word in the suffixWordMap
+        // find currentWord in suffixWordMap
+        mapItr = suffixWordMap.find(currentWord);
+        if(mapItr != suffixWordMap.end()) {
+            for(vItr = (*mapItr).second.begin(); vItr != (*mapItr).second.end(); vItr++) {
+                queryResult.push(*vItr);
+            }
+        } // else the word is not found in the suffixWordMap so pass
+
         move(3,0);                                      // output top line
         for(i=0; i<printNum; i++) {
             if(queryResult.empty()) break;
@@ -243,13 +332,31 @@ int main(int argc, char const *argv[])
             
             queryResult.pop();                          // remove top element
 
+
+            // need to fix below code after implementing reading searching string in the middle
+
+            // find word index
+            string queryStrNoSpace = queryStr;
+            if(queryStrNoSpace.back() == ' ')
+                queryStrNoSpace.pop_back();
+
+            int idxBegin = topQueryResult.second.find(queryStrNoSpace);
+            if(idxBegin != 0) {
+                if(idxBegin + queryStrNoSpace.length() != topQueryResult.second.length())
+                    if(!(topQueryResult.second[idxBegin-1] == ' ' && topQueryResult.second[idxBegin + queryStrNoSpace.length()] == ' ')) {
+                        // mvprintw(0, 30, "%d", idxBegin);
+                        idxBegin = topQueryResult.second.find(queryStrNoSpace, idxBegin+queryStrNoSpace.length());
+                        // mvprintw(0, 35, "%d", idxBegin);
+                    }
+            }
+            int idxEnd = idxBegin + queryStrNoSpace.length();
+
+            move(3+i, 0);
+            printw("%s", topQueryResult.second.substr(0, idxBegin).c_str());
             attron(COLOR_PAIR(1));
-            mvprintw(3+i, 0, "%s", queryStr.c_str());
+            printw("%s", queryStr.c_str());
             attroff(COLOR_PAIR(1));
-
-            // queryStr.size();
-
-            printw("%s", topQueryResult.second.substr(queryStr.length(), topQueryResult.second.length()).c_str());
+            printw("%s %d", topQueryResult.second.substr(idxEnd, topQueryResult.second.length()).c_str(), topQueryResult.first);
             clrtoeol();                                 // clear to end of line
         }
         clrtobot();                                     // clear from cursor until the last line
@@ -275,7 +382,9 @@ int main(int argc, char const *argv[])
 
 // TODO :: make a loading screen at file read (for very large files?)
 
-// 길게 입력하고 DEL key를 길게 누르면 아래 에러가 뜬다
-/* 
-Search Word: libc++abi: terminating with uncaught exception of type std::length_error: basic_string--------
-*/
+
+// Currently there is a bug where first word in the data file is not properlly found
+// though it is added to the trie
+
+// When two same word appear multiple times in a string
+// the highlighter doesn't work properly

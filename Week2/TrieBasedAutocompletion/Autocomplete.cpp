@@ -184,7 +184,7 @@ int main(int argc, char const *argv[])
 		openFile.close();
 	}
     else {
-        cout << "Unable to open file";
+        cout << "Unable to open file" << endl;
         return 0;
     }
 
@@ -210,7 +210,8 @@ int main(int argc, char const *argv[])
     initialize_ncurses();
     char ch;
     string queryStr = "";
-    priority_queue<pair<int,string> > queryResult;
+    priority_queue<pair<int,string> > queryResult;      // max heap by default, ordered by first in the pair
+    pair<int, string> topQueryResult;
     int printNum = 10, i;
 
     while(true) {
@@ -221,7 +222,8 @@ int main(int argc, char const *argv[])
             queryStr.push_back(ch);                     // when Alphabet key is pressed
         }
         else if(ch == '\x7F') {                         // Backspace is DEL
-            queryStr.pop_back();
+            if(queryStr.length() != 0)
+                queryStr.pop_back();
         }
         else continue;
 
@@ -236,7 +238,8 @@ int main(int argc, char const *argv[])
         move(3,0);                                      // output top line
         for(i=0; i<printNum; i++) {
             if(queryResult.empty()) break;
-            pair<int, string> data = queryResult.top();
+
+            topQueryResult = queryResult.top();         // get the top element
             
             queryResult.pop();                          // remove top element
 
@@ -244,7 +247,9 @@ int main(int argc, char const *argv[])
             mvprintw(3+i, 0, "%s", queryStr.c_str());
             attroff(COLOR_PAIR(1));
 
-            printw("%s", data.second.substr(queryStr.length(), data.second.length()).c_str());
+            // queryStr.size();
+
+            printw("%s", topQueryResult.second.substr(queryStr.length(), topQueryResult.second.length()).c_str());
             clrtoeol();                                 // clear to end of line
         }
         clrtobot();                                     // clear from cursor until the last line
@@ -256,3 +261,21 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
+
+
+// TODO :: when TAB  is pressed enter "selection mode"
+// in selection mode, trie search is not processed
+// move through prediction list using TAB or SHIFT + TAB or ARROW keys
+// selected input is updated on the input cursor but prediction list is not updated
+// When DEL is pressed, quit selection mode
+// When ENTER is pressed update input string to selected prediction string and quit selection mode
+
+// TODO :: when ENTER is pressed in query mode
+// do a search on google?
+
+// TODO :: make a loading screen at file read (for very large files?)
+
+// 길게 입력하고 DEL key를 길게 누르면 아래 에러가 뜬다
+/* 
+Search Word: libc++abi: terminating with uncaught exception of type std::length_error: basic_string--------
+*/

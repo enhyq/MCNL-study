@@ -150,6 +150,8 @@ void initialize_ncurses() {
     cbreak();                           // Line buffering disabled
     noecho();                           // no print out on screen
     // keypad(stdscr, true);            // ???
+
+    // default screen print
     mvprintw(0, 0, "(Press ESC to quit)");    // 화면의 0행, 0열부터 출력
     mvprintw(1, 0, "Search Word: ");
     mvprintw(2, 0, "---------------------------------------------");
@@ -308,6 +310,10 @@ int main(int argc, char const *argv[])
         
         // DEBUG PRINT
         // mvprintw(0, 21, "%s", currentWord.c_str()); clrtoeol();
+
+        // TODO :: 단어가 하나인 경우만 search 하도록 만들기
+        // 이렇게 안하면 검색할 때 오류생긴다.
+        // ex) "a city    " 검색시 버그 있음
 
         mvprintw(1, 13, "%s", queryStr.c_str());        // row, col, str
         clrtoeol();                                     // from current position, clear to end of line

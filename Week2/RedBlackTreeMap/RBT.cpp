@@ -3,7 +3,6 @@
 
 using namespace std;
 
-
 /**
  * Class template
  * insert()
@@ -19,23 +18,30 @@ using namespace std;
 enum { BLACK, RED };
 enum { LEFT, RIGHT};
 
-typedef struct node_t {
+// 
+template <typename Key, typename Value>
+struct node {
     bool color;
-    int value;
-    node_t *parent;
-    node_t *child[2];
+
+    Key key;
+    Value value;
+
+    node *parent;
+    node *child[2];
 
 
     /**
      * @brief Construct a new node object with value
      */
-    node_t(int value) {
+    node(Key key, Value value) {
         color = RED;
+        this->key = key;
         this->value = value;
         parent = child[0] = child[1] = NULL;    // parent is also initially NULL
     }
-} node;
+};
 
+template <typename Key, typename Value>
 class RBT {
     private:
     node *root;
@@ -75,8 +81,8 @@ class RBT {
         }
     }
 
-    void insertion(int value) {
-        node *N = new node(value);
+    void insertion(Key key, Value value) {
+        node *N = new node(key, value);
 
         if(root == NULL) {                                  // if empty
             N->color = BLACK;
@@ -84,7 +90,7 @@ class RBT {
             return;
         }
 
-        node *P = find_parent(value);
+        node *P = find_parent(key, value);
         N->parent = P;
         int dir = (N->value < P->value)?LEFT:RIGHT;         // if the new node is smaller than Parent, dir is LEFT, else RIGHT
         P->child[dir] = N;                                  // add node as child of parent

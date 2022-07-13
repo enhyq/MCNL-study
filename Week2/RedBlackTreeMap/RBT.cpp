@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <string>
 
 using namespace std;
 
@@ -18,17 +19,20 @@ using namespace std;
 enum { BLACK, RED };
 enum { LEFT, RIGHT};
 
-// 
+/**
+ * @brief node structure used as an element in Red Black Tree
+ * 
+ * @tparam Key 
+ * @tparam Value 
+ */
 template <typename Key, typename Value>
 struct node {
+    
     bool color;
-
     Key key;
     Value value;
-
     node *parent;
     node *child[2];
-
 
     /**
      * @brief Construct a new node object with value
@@ -41,21 +45,29 @@ struct node {
     }
 };
 
+/**
+ * @brief Red Black Tree which is made with node that has {key, value}
+ * 
+ * @tparam Key 
+ * @tparam Value 
+ */
 template <typename Key, typename Value>
 class RBT {
     private:
-    node *root;
+    node<Key, Value> *root;
 
     // prints element in inorder traversal (recursive)
-    void print_inorder(node* N) {
+    void print_inorder(node<Key, Value>* N) {
         if(N == NULL) return;
         
         print_inorder(N->child[LEFT]);
-        cout << "[" << N->value << "]";
+        cout << "[" << N->key << "]";
         print_inorder(N->child[RIGHT]);
     }
 
-    void print_level(node* N) {
+    void print_level_order(node<Key, Value>* N) {
+        cout << "[" << N->value << "]";
+        queue<node<Key, Value>*> q;
         
     }
 
@@ -65,15 +77,21 @@ class RBT {
         root = NULL;
     }
 
-    node* find_parent(int value) {
-        node *N = root;
+    /**
+     * @brief comparing the keys, it finds the node that is to be the parent of the inserted new node
+     * 
+     * @param key 
+     * @return node* 
+     */
+    node<Key, Value>* find_parent_node(Key key) {
+        node<Key, Value> *N = root;
         if(N == NULL) return NULL;                          // empty, no parent
         while(true) {
-            if(value < N->value) {                          // if value is smaller than current node -> goto left child
+            if(key < N->key) {                          // if value is smaller than current node -> goto left child
                 if(N->child[LEFT] == NULL) return N;
                 else N = N->child[LEFT];
             }
-            else if(value > N->value) {                     // if value is greater than current node -> goto right child
+            else if(key > N->key) {                     // if value is greater than current node -> goto right child
                 if(N->child[RIGHT] == NULL) return N;           
                 else N = N->child[RIGHT];
             }
@@ -82,7 +100,7 @@ class RBT {
     }
 
     void insertion(Key key, Value value) {
-        node *N = new node(key, value);
+        node<Key, Value> *N = new node<Key, Value>(key, value);
 
         if(root == NULL) {                                  // if empty
             N->color = BLACK;
@@ -90,16 +108,16 @@ class RBT {
             return;
         }
 
-        node *P = find_parent(key, value);
+        node<Key, Value> *P = find_parent_node(key);
         N->parent = P;
-        int dir = (N->value < P->value)?LEFT:RIGHT;         // if the new node is smaller than Parent, dir is LEFT, else RIGHT
+        int dir = (N->key < P->key)?LEFT:RIGHT;         // if the new node is smaller than Parent, dir is LEFT, else RIGHT
         P->child[dir] = N;                                  // add node as child of parent
         
         while(true) {
             if(P->color == BLACK) return;                       // if parent is black, is balanced
             // parent is RED
-            node *G = P->parent;                                // grand parent. If parent is RED, there must be non NULL G
-            node *U = (P->value < G->value)?G->child[RIGHT]:G->child[LEFT];
+            node<Key, Value> *G = P->parent;                                // grand parent. If parent is RED, there must be non NULL G
+            node<Key, Value> *U = (P->key < G->key)?G->child[RIGHT]:G->child[LEFT];
             // If U is BLACK or NIL
             if(U == NULL || U->color == BLACK) {
                 if(G->child[dir] != P) {                        // if inner node
@@ -144,11 +162,41 @@ class RBT {
     }
 
     void deletion(int value) {
+        // 0. find the node to be deleted
+        // set u and v. {v: node to delete, u: node that replaces v}
+        node<Key, Value> *v;
+        node<Key, Value> *u;
+        // 1. Do standard BST deletion
+            // a. if node to be deleted
+        
 
+        // 2. if either u or v is RED, mark the replaced child as BLACK and DONE.
+
+        // 3. if both u and v is BLACK
+        // 3.2 Let sibling of v be s
+
+            // a. if s is BLACK and at least a child of s is RED, let the red child be r -> rotation
+                // i. LL case)      s and r are left child of its parent
+                // ii. LR case)     s is left child, r is right child
+                // iii. RR case)    s are r are right child of its parent
+                // iv. RL case)     s is right child, l is left child
+            
+            // b. if s is BLACK and both of its children are BLACK -> recolor, and recur for the parent if its BLACK
+            // if parent is RED, make it BLACK and DONE.
+
+            // c. if s is RED
+            // perform rotation to move old sibling up, recolor the sibling and parent
+            // find new sibling, it will be black
+                // i. Left case)    s is left child of its parent       ->      right rotate parent p
+                // ii. Right case)  s is right child of its parent      ->      left rotate parent p
+
+        // 3.3 if u is root, make it single BLACK and return
+
+        // ** situation where both u and v are RED cannot occur
     }
 
     void print() {
-        cout << "print: ";
+        cout << "inorder print: ";
         print_inorder(root);
         cout << endl;
     }
@@ -159,15 +207,11 @@ int main(int argc, char const *argv[])
 {
     /* code */
 
-    RBT rbt;
-    for(int i=100; i>0; i-=2) {
-        rbt.insertion(i);
-        // rbt.print();
-    }
-    for(int i=1; i<100; i+=2) {
-        rbt.insertion(i);
-        // rbt.print();
-    }
+    RBT<string, int> rbt;
+    rbt.insertion("ab", 10);
+    rbt.insertion("b", 99);
+    rbt.insertion("zz", 1);
+    rbt.insertion("c", 0);
     rbt.print();
 
     return 0;

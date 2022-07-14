@@ -78,44 +78,44 @@ class RBT {
         print_inorder(N->child[RIGHT]);
     }
 
-    node<Key, Value>* next_inorder_node(node<Key, Value>* N) {
-        // if have left child, go left
-        // else if no left child, but have right child, go right
-        // else (no child)
-            // if N == root, return end();
-            // else {go up and check if I was right child}
-                // if N was right child
-                    // if parent is root, return end();
-                    // else go up
-                // if N was left child
-                    // if P have right child, go right child
-                    // else go up
-        if(N->child[LEFT] != NULL) {
-            while(N->child[LEFT] != NULL) {
-                N = N->child[LEFT];
+    /**
+     * @brief Using inorder traversal, it finds and returns the next node
+     * 
+     * @param N node to begin searching
+     * @return node<Key, Value>* 
+     */
+    node<Key, Value>* next_node(node<Key, Value>* N) {
+        // if no right child
+            // while(current node is not root)
+                // go up and check if I am right child
+                // if left child
+                    // return current node
+                // else
+                    // if root
+                        // return nullptr
+        // else
+            // find min in the rigth sub tree
+        int dir;
+        node<Key, Value>* P;
+        if(N->child[RIGHT] != NULL) {
+            while(N != root) {
+                P = N->parent;
+                dir = (P->child[LEFT] == N)? LEFT : RIGHT;
+                if(dir == LEFT)
+                    return P;
+                else
+                    if(P == root) return nullptr;
             }
-            return N;
         }
-        else if(N->child[RIGHT] != NULL)
-            N = N->child[RIGHT];
         else {
-            if(N == root) return NULL;
-            else {
-                node<Key, Value>* P = N->parent;
-                int dir = (P->child[LEFT]!=NULL && P->child[LEFT].key_value == N->key_value)?LEFT:RIGHT;
-                if(dir == RIGHT) {
-                    if(P == root) return NULL;
-                    else next_inorder_node(P);
-                }
-                else {
-                    if(P->child[LEFT] != NULL) next_inorder_node(&(P->child[LEFT]));
-                    else next_inorder_node(P);
-                }
-            }
+            N = N->child[RIGHT];
+            while(N->child[LEFT] != NULL)
+                N = N->child[LEFT];
+            return N;
         }
     }
 
-    // previous inorder node ???
+    // previous node ???
 
     void print_level_order(node<Key, Value>* N) {
         cout << "[" << N->value << "]";
@@ -135,7 +135,7 @@ class RBT {
         return NULL;
     }
 
-    
+
 
     // Constructs a new RBT object with NULL root
     RBT() {

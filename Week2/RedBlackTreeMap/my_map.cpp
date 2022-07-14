@@ -9,20 +9,34 @@ class my_map{
     RBT<Key, Value> rbt;
 
     public:
+
+    typedef RBTIterator<Key, Value> iterator;
+
+    iterator begin() {
+        return rbt.begin();
+    }
+
+    iterator end() {
+        return rbt.end();
+    }
+
     void insert(pair<Key, Value> p) {
         rbt.insertion(p);
     }
 
     void erase(Key key) {
-        // TODO
+        rbt.deletion(key);
     }
 
-    // RBT<Key, Value>* find()  
-    pair<Key, Value>* find(Key key) {
+    iterator find(Key key) {
+
         return rbt.find(key);
     }                   
 
-    Value &operator[](Key key) {
-        return rbt.find(key)->second;
+    Value& operator[](Key key) {
+        iterator it = rbt.find(key);
+        if(it.get_cur() == nullptr) // insert new if not found
+            rbt.insertion(make_pair(key, 0));
+        return rbt.find(key).get_cur()->key_value.second;
     }
 };

@@ -49,12 +49,73 @@ class RBTIterator{
     private:
     node<Key, Value> *cur;
 
-    public:
-    RBTIterator() {
-        return;
+    /**
+     * @brief Using inorder traversal, it finds and returns the next node
+     * 
+     * @param N node to begin searching
+     * @return node<Key, Value>* 
+     */
+    node<Key, Value>* next_node(node<Key, Value>* N) {
+        // if no right child
+            // while(current node is not root)
+                // go up and check if I am right child
+                // if left child
+                    // return current node
+                // else
+                    // if root
+                        // return nullptr
+        // else
+            // find min in the rigth sub tree
+        int dir;
+        node<Key, Value>* P;
+        if(N->child[RIGHT] == NULL) {
+            while(N->parent != NULL) {
+                P = N->parent;
+                dir = (P->child[LEFT] == N)? LEFT : RIGHT;
+                if(dir == LEFT)
+                    return P;
+                else
+                    if(P->parent == NULL) return nullptr;       // if root
+                    N = P;
+            }
+            return N;
+        }
+        else {
+            N = N->child[RIGHT];
+            while(N->child[LEFT] != NULL)
+                N = N->child[LEFT];
+            return N;
+        }
     }
-    // begin()
-    // end()
+
+    // TODO :: find previous node
+
+    public:
+    RBTIterator(node<Key, Value>* n = nullptr) {
+        cur = n;
+    }
+
+    pair<Key, Value> get_value() {
+        return this->cur->key_value;
+    }
+
+    node<Key, Value>* get_cur() {
+        return this->cur;
+    }
+
+
+    RBTIterator operator ++ (int) {                     // postfix increment operator
+        cur = next_node(cur);
+        return *this;
+    }
+
+    bool operator != (const RBTIterator &iter) {
+        return this->cur != iter.cur;
+    }
+
+    pair<Key, Value>* operator -> () {
+        return &(this->cur->key_value);
+    }
 };
 
 
@@ -78,45 +139,6 @@ class RBT {
         print_inorder(N->child[RIGHT]);
     }
 
-    /**
-     * @brief Using inorder traversal, it finds and returns the next node
-     * 
-     * @param N node to begin searching
-     * @return node<Key, Value>* 
-     */
-    node<Key, Value>* next_node(node<Key, Value>* N) {
-        // if no right child
-            // while(current node is not root)
-                // go up and check if I am right child
-                // if left child
-                    // return current node
-                // else
-                    // if root
-                        // return nullptr
-        // else
-            // find min in the rigth sub tree
-        int dir;
-        node<Key, Value>* P;
-        if(N->child[RIGHT] != NULL) {
-            while(N != root) {
-                P = N->parent;
-                dir = (P->child[LEFT] == N)? LEFT : RIGHT;
-                if(dir == LEFT)
-                    return P;
-                else
-                    if(P == root) return nullptr;
-            }
-        }
-        else {
-            N = N->child[RIGHT];
-            while(N->child[LEFT] != NULL)
-                N = N->child[LEFT];
-            return N;
-        }
-    }
-
-    // previous node ???
-
     void print_level_order(node<Key, Value>* N) {
         cout << "[" << N->value << "]";
         queue<node<Key, Value>*> q;
@@ -128,37 +150,27 @@ class RBT {
     typedef RBTIterator<Key, Value> iterator;
 
     iterator begin() {
-        return next_inorder_node(root);
+        node<Key, Value> *n = root;
+        while(n->child[LEFT] != NULL)
+            n = n->child[LEFT];
+        return iterator(n);
     }
 
     iterator end() {
-        return NULL;
+        return iterator();                                 // end node is marked nullptr
     }
 
-
-
-    // Constructs a new RBT object with NULL root
-    RBT() {
-        root = NULL;
-    }
     /**
      * @brief 
      * 
      */
-    pair<Key, Value>* find(Key key) {
-        node<Key, Value> *N = root;
-        if(N == NULL) return NULL;
-        while(true) {
-            if(key < N->key_value.first) {
-                N = N->child[LEFT];
-            }
-            else if(key > N->key_value.first) {
-                N = N->child[RIGHT];
-            }
-            else {
-                return &(N->key_value);
-            }
-        }
+    iterator find(Key key) {
+        return iterator(find_node(key));
+    }
+
+    // Constructs a new RBT object with NULL root
+    RBT() {
+        root = NULL;
     }
 
     /**
@@ -184,6 +196,22 @@ class RBT {
                 return NULL;
             }
         }
+    }
+
+    node<Key, Value>* find_node(Key key) {
+        node<Key, Value> *N = root;
+        while(N != NULL) {
+            if(key < N->key_value.first) {
+                N = N->child[LEFT];
+            }
+            else if(key > N->key_value.first) {
+                N = N->child[RIGHT];
+            }
+            else {  // found key
+                return N;
+            }
+        }
+        return nullptr;
     }
 
     void insertion(pair<Key, Value> p) {
@@ -248,20 +276,81 @@ class RBT {
         }
     }
 
-    void deletion(int value) {
+
+    node<Key, Value>* rotate(node<Key, Value>* P, node<Key, Value>* R, int dir) {
+
+    }
+    
+    int find_child_dir(node<Key, Value>* N) {
+        if(N->parent == NULL) return -1;        // is root
+        if(N->parent->child[LEFT] == N) return LEFT;
+        return RIGHT;
+    }
+
+    node<Key, Value>* standard_BST_deletion(node<Key, Value>* N) {
+        // leaf node
+        if(N->child[LEFT] == NULL && N->child[RIGHT] == NULL)
+            
+
+        // single child
+        else if(V->child[LEFT] != NULL)
+
+
+        // two children
+        else
+
+
+        return 
+    }
+
+    void deletion(Key key) {
         // 0. find the node to be deleted
-        // set u and v. {v: node to delete, u: node that replaces v}
-        node<Key, Value> *v;
-        node<Key, Value> *u;
-        // 1. Do standard BST deletion
-            // a. if node to be deleted
+        // set N and U. {N: node to delete, U: node that replaces V}
+
+        // FIND N
+        node<Key, Value>* N = find_node(key);
+        if(N == nullptr) return;                                // key does not exist, nothing to do
+
+        node<Key, Value>* P = N->parent;
+        int dir = find_child_dir(N);
+        node<Key, Value>* S = N->child[1-dir];
         
+        N = standard_BST_deletion(N);
+        
+        
+        // FIND U
+        node<Key, Value> *U;
+        // check if V is leaf node
+        
+        // find maximum in the left sub tree
+        else if(V->child[LEFT] != NULL) {
+            U = V->child[LEFT];
+            while(U->child[RIGHT] != NULL)
+                U = U->child[RIGHT];
+        }
+        // if no left child
+        else
+            U = V->child[RIGHT];
 
+        // 1. Do standard BST deletion
         // 2. if either u or v is RED, mark the replaced child as BLACK and DONE.
+        if(U != NULL && (V->color == RED || U->color == RED)) {
+            V->key_value = U->key_value;
+            V->color = BLACK;
+            // int dir = find_child_dir(U);
+            U->parent.
+            delete U;
+            return;
+        }
 
-        // 3. if both u and v is BLACK
+        // standard BST delete
+        if(U != NULL) // if U is not NULL
+
+
+        // 3. if both u and v is BLACK (both u, v RED cannot exist if RBT is properly made)
         // 3.2 Let sibling of v be s
-
+        int dir = (V->parent)
+        node<Key, Value> *S = V->parent
             // a. if s is BLACK and at least a child of s is RED, let the red child be r -> rotation
                 // i. LL case)      s and r are left child of its parent
                 // ii. LR case)     s is left child, r is right child
@@ -291,16 +380,16 @@ class RBT {
 };
 
 
-int main(int argc, char const *argv[])
-{
-    /* code */
+// int main(int argc, char const *argv[])
+// {
+//     /* code */
 
-    RBT<string, int> rbt;
-    rbt.insertion(make_pair("ab", 10));
-    rbt.insertion(make_pair("b", 99));
-    rbt.insertion(make_pair("zz", 1));
-    rbt.insertion(make_pair("c", 0));
-    rbt.print();
+//     RBT<string, int> rbt;
+//     rbt.insertion(make_pair("ab", 10));
+//     rbt.insertion(make_pair("b", 99));
+//     rbt.insertion(make_pair("zz", 1));
+//     rbt.insertion(make_pair("c", 0));
+//     rbt.print();
 
-    return 0;
-}
+//     return 0;
+// }

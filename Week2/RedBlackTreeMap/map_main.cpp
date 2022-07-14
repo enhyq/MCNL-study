@@ -5,17 +5,18 @@
 
 using namespace std;
 
-void print_map(map<string, int> m)
-{
-    map<string, int>::iterator iter;
+#define MAP my_map
 
-    for( iter = m.begin(); iter != m.end(); iter++) {
+void print_map(MAP<string, int> m)
+{
+    MAP<string, int>::iterator iter;
+    for(iter = m.begin(); iter != m.end(); iter++) {
         cout << iter->first << ": " << iter->second << '\n';
     }
 }
 
 int main() {
-    map<string, int> m;
+    MAP<string, int> m;
 
     cout << "** First Step **\n";
     m.insert(make_pair("Global", 10));

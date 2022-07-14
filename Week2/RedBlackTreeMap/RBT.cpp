@@ -27,23 +27,36 @@ enum { LEFT, RIGHT};
  */
 template <typename Key, typename Value>
 struct node {
-    
+
     bool color;
-    Key key;
-    Value value;
+    pair<Key, Value> key_value;
     node *parent;
     node *child[2];
 
     /**
      * @brief Construct a new node object with value
      */
-    node(Key key, Value value) {
+    node(pair<Key, Value> key_value) {
         color = RED;
-        this->key = key;
-        this->value = value;
+        this->key_value = key_value;
         parent = child[0] = child[1] = NULL;    // parent is also initially NULL
     }
 };
+
+
+template <typename Key, typename Value>
+class RBTIterator{
+    private:
+    node<Key, Value> *cur;
+
+    public:
+    RBTIterator() {
+        return;
+    }
+    // begin()
+    // end()
+};
+
 
 /**
  * @brief Red Black Tree which is made with node that has {key, value}
@@ -61,9 +74,48 @@ class RBT {
         if(N == NULL) return;
         
         print_inorder(N->child[LEFT]);
-        cout << "[" << N->key << "]";
+        cout << "[" << N->key_value.first << "]";
         print_inorder(N->child[RIGHT]);
     }
+
+    node<Key, Value>* next_inorder_node(node<Key, Value>* N) {
+        // if have left child, go left
+        // else if no left child, but have right child, go right
+        // else (no child)
+            // if N == root, return end();
+            // else {go up and check if I was right child}
+                // if N was right child
+                    // if parent is root, return end();
+                    // else go up
+                // if N was left child
+                    // if P have right child, go right child
+                    // else go up
+        if(N->child[LEFT] != NULL) {
+            while(N->child[LEFT] != NULL) {
+                N = N->child[LEFT];
+            }
+            return N;
+        }
+        else if(N->child[RIGHT] != NULL)
+            N = N->child[RIGHT];
+        else {
+            if(N == root) return NULL;
+            else {
+                node<Key, Value>* P = N->parent;
+                int dir = (P->child[LEFT]!=NULL && P->child[LEFT].key_value == N->key_value)?LEFT:RIGHT;
+                if(dir == RIGHT) {
+                    if(P == root) return NULL;
+                    else next_inorder_node(P);
+                }
+                else {
+                    if(P->child[LEFT] != NULL) next_inorder_node(&(P->child[LEFT]));
+                    else next_inorder_node(P);
+                }
+            }
+        }
+    }
+
+    // previous inorder node ???
 
     void print_level_order(node<Key, Value>* N) {
         cout << "[" << N->value << "]";
@@ -72,9 +124,41 @@ class RBT {
     }
 
     public:
+
+    typedef RBTIterator<Key, Value> iterator;
+
+    iterator begin() {
+        return next_inorder_node(root);
+    }
+
+    iterator end() {
+        return NULL;
+    }
+
+    
+
     // Constructs a new RBT object with NULL root
     RBT() {
         root = NULL;
+    }
+    /**
+     * @brief 
+     * 
+     */
+    pair<Key, Value>* find(Key key) {
+        node<Key, Value> *N = root;
+        if(N == NULL) return NULL;
+        while(true) {
+            if(key < N->key_value.first) {
+                N = N->child[LEFT];
+            }
+            else if(key > N->key_value.first) {
+                N = N->child[RIGHT];
+            }
+            else {
+                return &(N->key_value);
+            }
+        }
     }
 
     /**
@@ -87,20 +171,23 @@ class RBT {
         node<Key, Value> *N = root;
         if(N == NULL) return NULL;                          // empty, no parent
         while(true) {
-            if(key < N->key) {                          // if value is smaller than current node -> goto left child
+            if(key < N->key_value.first) {                          // if value is smaller than current node -> goto left child
                 if(N->child[LEFT] == NULL) return N;
                 else N = N->child[LEFT];
             }
-            else if(key > N->key) {                     // if value is greater than current node -> goto right child
+            else if(key > N->key_value.first) {                     // if value is greater than current node -> goto right child
                 if(N->child[RIGHT] == NULL) return N;           
                 else N = N->child[RIGHT];
             }
-            // didn't implement case when (value == N->value)
+            else {  // (key == N->key_value.first)
+                cout << "key already exists" << endl;
+                return NULL;
+            }
         }
     }
 
-    void insertion(Key key, Value value) {
-        node<Key, Value> *N = new node<Key, Value>(key, value);
+    void insertion(pair<Key, Value> p) {
+        node<Key, Value> *N = new node<Key, Value>(p);
 
         if(root == NULL) {                                  // if empty
             N->color = BLACK;
@@ -108,16 +195,16 @@ class RBT {
             return;
         }
 
-        node<Key, Value> *P = find_parent_node(key);
+        node<Key, Value> *P = find_parent_node(p.first);
         N->parent = P;
-        int dir = (N->key < P->key)?LEFT:RIGHT;         // if the new node is smaller than Parent, dir is LEFT, else RIGHT
+        int dir = (N->key_value.first < P->key_value.first)?LEFT:RIGHT;         // if the new node is smaller than Parent, dir is LEFT, else RIGHT
         P->child[dir] = N;                                  // add node as child of parent
         
         while(true) {
             if(P->color == BLACK) return;                       // if parent is black, is balanced
             // parent is RED
             node<Key, Value> *G = P->parent;                                // grand parent. If parent is RED, there must be non NULL G
-            node<Key, Value> *U = (P->key < G->key)?G->child[RIGHT]:G->child[LEFT];
+            node<Key, Value> *U = (P->key_value.first < G->key_value.first)?G->child[RIGHT]:G->child[LEFT];
             // If U is BLACK or NIL
             if(U == NULL || U->color == BLACK) {
                 if(G->child[dir] != P) {                        // if inner node
@@ -203,15 +290,16 @@ class RBT {
 
 };
 
+
 int main(int argc, char const *argv[])
 {
     /* code */
 
     RBT<string, int> rbt;
-    rbt.insertion("ab", 10);
-    rbt.insertion("b", 99);
-    rbt.insertion("zz", 1);
-    rbt.insertion("c", 0);
+    rbt.insertion(make_pair("ab", 10));
+    rbt.insertion(make_pair("b", 99));
+    rbt.insertion(make_pair("zz", 1));
+    rbt.insertion(make_pair("c", 0));
     rbt.print();
 
     return 0;

@@ -9,6 +9,13 @@
 
 using namespace std;
 
+/*
+ * given a word, if a letter in the word is separated, it is not considered a group word
+ * else it is group word
+ * ex) aabbcc == group word
+ * ex2) aabbaa == not a group word
+ */
+
 int main(int argc, char const *argv[])
 {
     int N, i, j, count=0;

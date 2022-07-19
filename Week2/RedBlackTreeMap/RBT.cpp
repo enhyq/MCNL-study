@@ -290,55 +290,54 @@ class RBT {
     node<Key, Value>* standard_BST_deletion(node<Key, Value>* N) {
         // leaf node
         if(N->child[LEFT] == NULL && N->child[RIGHT] == NULL)
-            
-
+            return NULL;
         // single child
-        else if(V->child[LEFT] != NULL)
-
-
+        else if(N->child[LEFT] != NULL)                                 // in RBT, single child cannot have sub child, due to balance issue
+            return N->child[RIGHT];
         // two children
         else
-
-
-        return 
+            N = N->child[LEFT];
+            while(N->child[RIGHT] != NULL) N = N->child[RIGHT];         // find max in the left sub tree
+        return N;
     }
 
     void deletion(Key key) {
-        // 0. find the node to be deleted
-        // set N and U. {N: node to delete, U: node that replaces V}
+        // 0. find the node to be deleted and delete
+        // N: node to be deleted
+        // U: node to replace deleted N
 
         // FIND N
-        node<Key, Value>* N = find_node(key);
+        node<Key, Value>* N = find_node(key);                   // find node to be deleted
         if(N == nullptr) return;                                // key does not exist, nothing to do
-
-        node<Key, Value>* P = N->parent;
-        int dir = find_child_dir(N);
-        node<Key, Value>* S = N->child[1-dir];
         
-        N = standard_BST_deletion(N);
-        
-        
-        // FIND U
-        node<Key, Value> *U;
-        // check if V is leaf node
-        
-        // find maximum in the left sub tree
-        else if(V->child[LEFT] != NULL) {
-            U = V->child[LEFT];
-            while(U->child[RIGHT] != NULL)
-                U = U->child[RIGHT];
-        }
-        // if no left child
-        else
-            U = V->child[RIGHT];
+        node<Key, Value> *U = standard_BST_deletion(N);         // node that will replace delete N
 
         // 1. Do standard BST deletion
+        // place of U is important, but after getting P and S, U is not very important
+        node<Key, Value>* P;                                    // parent of deleted node
+        node<Key, Value>* S;                                    // sibling of deleted node
+        int dir;         
+        if(U == NULL) {                                         // if node to delete was leaf node
+            if(N == root) {                                     // if node to delete was root -> root is not NULL and RBT is empty
+                root = NULL;
+                delete N;
+                return;
+            }
+            P = N->parent;
+            dir = find_child_dir(N);
+            S = P->child[1-dir];
+        }
+        else {
+
+        }
+
+
         // 2. if either u or v is RED, mark the replaced child as BLACK and DONE.
-        if(U != NULL && (V->color == RED || U->color == RED)) {
-            V->key_value = U->key_value;
-            V->color = BLACK;
+        if(U != NULL && (N->color == RED || U->color == RED)) {
+            N->key_value = U->key_value;
+            N->color = BLACK;
             // int dir = find_child_dir(U);
-            U->parent.
+            // U->parent.
             delete U;
             return;
         }
@@ -349,8 +348,8 @@ class RBT {
 
         // 3. if both u and v is BLACK (both u, v RED cannot exist if RBT is properly made)
         // 3.2 Let sibling of v be s
-        int dir = (V->parent)
-        node<Key, Value> *S = V->parent
+        int dir = (N->parent);
+        node<Key, Value> *S = N->parent;
             // a. if s is BLACK and at least a child of s is RED, let the red child be r -> rotation
                 // i. LL case)      s and r are left child of its parent
                 // ii. LR case)     s is left child, r is right child
@@ -380,16 +379,16 @@ class RBT {
 };
 
 
-// int main(int argc, char const *argv[])
-// {
-//     /* code */
+int main(int argc, char const *argv[])
+{
+    /* code */
 
-//     RBT<string, int> rbt;
-//     rbt.insertion(make_pair("ab", 10));
-//     rbt.insertion(make_pair("b", 99));
-//     rbt.insertion(make_pair("zz", 1));
-//     rbt.insertion(make_pair("c", 0));
-//     rbt.print();
+    RBT<string, int> rbt;
+    rbt.insertion(make_pair("ab", 10));
+    rbt.insertion(make_pair("b", 99));
+    rbt.insertion(make_pair("zz", 1));
+    rbt.insertion(make_pair("c", 0));
+    rbt.print();
 
-//     return 0;
-// }
+    return 0;
+}

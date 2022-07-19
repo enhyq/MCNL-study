@@ -276,9 +276,9 @@ class RBT {
         }
     }
 
-
+    // rotate P and R in dir direction
     node<Key, Value>* rotate(node<Key, Value>* P, node<Key, Value>* R, int dir) {
-
+        
     }
     
     int find_child_dir(node<Key, Value>* N) {

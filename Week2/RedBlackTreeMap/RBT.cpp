@@ -346,7 +346,7 @@ class RBT {
         if(U != NULL) // if U is not NULL
 
 
-        // 3. if both u and v is BLACK (both u, v RED cannot exist if RBT is properly made)
+        // 3. if both u and v are BLACK (both u, v RED cannot exist if RBT is properly made)
         // 3.2 Let sibling of v be s
         int dir = (N->parent);
         node<Key, Value> *S = N->parent;

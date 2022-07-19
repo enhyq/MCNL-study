@@ -353,77 +353,81 @@ public:
         return N;
     }
 
-    void myDeletion(Key key)
-    {
-        // 0. find the node to be deleted and delete
-        // N: node to be deleted
-        // U: node to replace deleted N
+    /************************************************************************/
 
-        // FIND N
-        node<Key, Value> *N = find_node(key); // find node to be deleted
-        if (N == nullptr)
-            return; // key does not exist, nothing to do
+    // void myDeletion(Key key)
+    // {
+    //     // 0. find the node to be deleted and delete
+    //     // N: node to be deleted
+    //     // U: node to replace deleted N
 
-        node<Key, Value> *U = standard_BST_deletion(N); // node that will replace delete N
+    //     // FIND N
+    //     node<Key, Value> *N = find_node(key); // find node to be deleted
+    //     if (N == nullptr)
+    //         return; // key does not exist, nothing to do
 
-        // 1. Do standard BST deletion
-        // place of U is important, but after getting P and S, U is not very important
-        node<Key, Value> *P; // parent of deleted node
-        node<Key, Value> *S; // sibling of deleted node
-        int dir;
-        if (U == NULL)
-        { // if node to delete was leaf node
-            if (N == root)
-            { // if node to delete was root -> root is not NULL and RBT is empty
-                root = NULL;
-                delete N;
-                return;
-            }
-            P = N->parent;
-            dir = find_child_dir(N);
-            S = P->child[1 - dir];
-        }
-        else
-        {
-        }
+    //     node<Key, Value> *U = standard_BST_deletion(N); // node that will replace delete N
 
-        // 2. if either u or v is RED, mark the replaced child as BLACK and DONE.
-        if (U != NULL && (N->color == RED || U->color == RED))
-        {
-            N->key_value = U->key_value;
-            N->color = BLACK;
-            // int dir = find_child_dir(U);
-            // U->parent.
-            delete U;
-            return;
-        }
+    //     // 1. Do standard BST deletion
+    //     // place of U is important, but after getting P and S, U is not very important
+    //     node<Key, Value> *P; // parent of deleted node
+    //     node<Key, Value> *S; // sibling of deleted node
+    //     int dir;
+    //     if (U == NULL)
+    //     { // if node to delete was leaf node
+    //         if (N == root)
+    //         { // if node to delete was root -> root is not NULL and RBT is empty
+    //             root = NULL;
+    //             delete N;
+    //             return;
+    //         }
+    //         P = N->parent;
+    //         dir = find_child_dir(N);
+    //         S = P->child[1 - dir];
+    //     }
+    //     else
+    //     {
+    //     }
 
-        // standard BST delete
-        if (U != NULL) // if U is not NULL
+    //     // 2. if either u or v is RED, mark the replaced child as BLACK and DONE.
+    //     if (U != NULL && (N->color == RED || U->color == RED))
+    //     {
+    //         N->key_value = U->key_value;
+    //         N->color = BLACK;
+    //         // int dir = find_child_dir(U);
+    //         // U->parent.
+    //         delete U;
+    //         return;
+    //     }
 
-            // 3. if both u and v are BLACK (both u, v RED cannot exist if RBT is properly made)
-            // 3.2 Let sibling of v be s
-            int dir = (N->parent);
-        node<Key, Value> *S = N->parent;
-        // a. if s is BLACK and at least a child of s is RED, let the red child be r -> rotation
-        // i. LL case)      s and r are left child of its parent
-        // ii. LR case)     s is left child, r is right child
-        // iii. RR case)    s are r are right child of its parent
-        // iv. RL case)     s is right child, l is left child
+    //     // standard BST delete
+    //     if (U != NULL) // if U is not NULL
 
-        // b. if s is BLACK and both of its children are BLACK -> recolor, and recur for the parent if its BLACK
-        // if parent is RED, make it BLACK and DONE.
+    //         // 3. if both u and v are BLACK (both u, v RED cannot exist if RBT is properly made)
+    //         // 3.2 Let sibling of v be s
+    //         int dir = (N->parent);
+    //     node<Key, Value> *S = N->parent;
+    //     // a. if s is BLACK and at least a child of s is RED, let the red child be r -> rotation
+    //     // i. LL case)      s and r are left child of its parent
+    //     // ii. LR case)     s is left child, r is right child
+    //     // iii. RR case)    s are r are right child of its parent
+    //     // iv. RL case)     s is right child, l is left child
 
-        // c. if s is RED
-        // perform rotation to move old sibling up, recolor the sibling and parent
-        // find new sibling, it will be black
-        // i. Left case)    s is left child of its parent       ->      right rotate parent p
-        // ii. Right case)  s is right child of its parent      ->      left rotate parent p
+    //     // b. if s is BLACK and both of its children are BLACK -> recolor, and recur for the parent if its BLACK
+    //     // if parent is RED, make it BLACK and DONE.
 
-        // 3.3 if u is root, make it single BLACK and return
+    //     // c. if s is RED
+    //     // perform rotation to move old sibling up, recolor the sibling and parent
+    //     // find new sibling, it will be black
+    //     // i. Left case)    s is left child of its parent       ->      right rotate parent p
+    //     // ii. Right case)  s is right child of its parent      ->      left rotate parent p
 
-        // ** situation where both u and v are RED cannot occur
-    }
+    //     // 3.3 if u is root, make it single BLACK and return
+
+    //     // ** situation where both u and v are RED cannot occur
+    // }
+
+    /************************************************************************/
 
     void print()
     {

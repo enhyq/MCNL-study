@@ -647,7 +647,7 @@ public:
     }
 
     // deletes the given node
-    void deleteNode(node<Key, Value> *v)
+    void deletion(node<Key, Value> *v)
     {
         node<Key, Value> *u = BSTreplace(v);
 
@@ -732,7 +732,7 @@ public:
 
         // v has 2 children, swap values with successor and recurse
         swapValues(u, v);
-        deleteNode(u);
+        deletion(u);
     }
 
     void fixDoubleBlack(node<Key, Value> *x)

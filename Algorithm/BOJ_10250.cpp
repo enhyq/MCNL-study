@@ -1,6 +1,6 @@
 /**
  * @author Eunhyeok Kwon
- * @date 2022-07-25 ~ 2022-07-25
+ * @date 2022-07-25 ~ 2022-07-26
  * @link https://www.acmicpc.net/problem/10250
  */
 

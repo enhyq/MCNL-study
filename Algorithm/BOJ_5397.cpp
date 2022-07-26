@@ -19,15 +19,17 @@ using namespace std;
 struct node
 {
     char letter;
-    node* prev;
-    node* next;
+    node *prev;
+    node *next;
 
-    node(char letter) {
+    node(char letter)
+    {
         this->letter = letter;
         prev = NULL;
         next = NULL;
     }
-    node(node* prev, char letter, node* next) {
+    node(node *prev, char letter, node *next)
+    {
         this->letter = letter;
         this->prev = prev;
         this->next = next;
@@ -41,75 +43,74 @@ int main(int argc, char const *argv[])
     string str;
     char l;
     cin >> T;
-    while(T--)
+    while (T--)
     {
         // free linked list
-        top = NULL;
+
+        top = new node(0); // top begins with empty node that stores 0 as its letter value, this node is always the top node
         cur = top;
         cin >> str;
-        for(i=0; i<str.length(); i++)
+        for (i = 0; i < str.length(); i++)
         {
             l = str.at(i);
-            if(('a'<=l && l <= 'z') || ('A'<=l && l<='Z'))
+            if (('a' <= l && l <= 'z') || ('A' <= l && l <= 'Z') || ('0' <= l && l <= '9'))
             {
-                if(top == NULL)
-                {
-                    node *new_node = new node(l);
-                    top = new_node;
-                    cur = new_node;
-                }
-                else
-                {
-                    node *new_node = new node(cur, l, cur->next);
-                    cur->next = new_node;
-                    if(cur->next)
-                    {
-                        cur->next->prev = new_node;
-                    }
-                    cur = new_node;
-                }
+                // new node is inserted after the current node
+                // cur - new_node - cur->next
+                node *new_node = new node(cur, l, cur->next);
+                if (cur->next)
+                    cur->next->prev = new_node;
+                cur->next = new_node;
+                cur = new_node;
             }
-            else if(top == NULL)
+            else if (cur != top)
             {
-                continue;
+                if (l == '<')
+                {
+                    if (cur->prev != NULL)
+                        cur = cur->prev;
+                }
+                else if (l == '-')
+                {
+                    if (cur->prev)
+                        cur->prev->next = cur->next;
+                    if (cur->next)
+                        cur->next->prev = cur->prev;
+                    tmp = cur; // node to delete
+                    cur = cur->prev;
+                    delete tmp;
+                }
+                else if (l == '>')
+                {
+                    if (cur->next != NULL)
+                        cur = cur->next;
+                }
             }
             else
             {
-                switch (l)
+                if (l == '>')
                 {
-                    case '<':
-                        if(cur->prev != NULL)
-                        {
-                            cur = cur->prev;
-                        }
-                        break;
-                    case '>':
-                        if(cur->prev != NULL)
-                        {
-                            cur = cur->next;
-                        }
-                        break;
-                    case '-':
-                        cur->prev->next = cur->next;
-                        cur->next->prev = cur->prev;
-                        tmp = cur;
-                        cur = cur->prev?cur->prev:cur->next;
-                        // case when left end node
-                        // when top is deleted
-                        delete tmp;
-                        
-                        break;
+                    if (cur->next != NULL)
+                        cur = cur->next;
                 }
             }
+
+            // tmp = top;
+            // while (tmp != NULL)
+            // {
+            //     cout << (char)tmp->letter;
+            //     if(tmp == cur) cout << "|";
+            //     tmp = tmp->next;
+            // }
+            // cout << endl;
         }
-        
-        while(top != NULL)
+
+        while (top != NULL)
         {
-            cout << top->letter;
+            cout << (char)top->letter;
             top = top->next;
         }
         cout << endl;
-
     }
     return 0;
 }

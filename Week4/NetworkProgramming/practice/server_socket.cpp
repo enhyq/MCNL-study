@@ -1,15 +1,17 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 #include <unistd.h>         // for data transfer
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include <fcntl.h>
+
 using namespace std;
 
 void endian_test(); // test endian print
-int create_listening_socket(int port, string ip);   // create a listening socket
+int create_listening_socket(sockaddr_in *myaddr, int port, string ip);   // create a listening socket
 
 int main(int argc, char const *argv[])
 {
@@ -32,22 +34,87 @@ int main(int argc, char const *argv[])
 
     sockaddr_in *myaddr = new sockaddr_in();
     sockaddr_in *caddr = new sockaddr_in();
-    int caddr_len;
+    unsigned int caddr_len;
 
-    int ss = create_listening_socket(12905, "127.0.0.1");
-    int cs = accept(ss, (sockaddr *)caddr, (socklen_t *)&caddr_len);
-
-    string input;
-    while(true)
+    int ss_fd = create_listening_socket(myaddr, 80, "127.0.0.1");
+    if(ss_fd == -1)
     {
-        cin >> input;
-        if(input == "exit") break;
+        cout << "failed to create listening socket" << endl;
+        return 1;
+    }
+    int cs_fd = accept(ss_fd, (sockaddr *)caddr, &caddr_len);
 
-        write(cs, (void *)&input, input.length());
-        cout << "message sent: " << input << endl;
+    cout << "client fd: " << cs_fd << endl << endl;
+
+    char message[1000];
+    int msg_len;
+
+    msg_len = read(cs_fd, message, sizeof(message)-1);
+    cout << message << endl;
+
+    // string header = "test";
+    // "HTTP/1.1 200 OK\n";
+    // "Date: Fri, 01 Feb 2002 01:34:56 GMT\n";
+    // "Server: Apache/1.3.19 (Unix) PHP/4.0.6\n";
+    // "X-Powered-By: PHP/4.0.6\n";
+    // "Connection: close\n";
+    // "Content-Length: 3\n";
+    // "Content-Type: text/html\n\n";
+
+    // send(cs_fd, header.c_str(), header.length(), 0);
+
+    // write(cs_fd, header.c_str(), header.length());
+
+
+
+    // cout << "header: " << header << endl << endl;
+
+    int fd = open("index.html", O_RDONLY);
+    cout << "fd: " << fd << endl;
+    char buf_out[1024];
+    int n;
+    while ( (n = read(fd, buf_out, 255)) > 0)    
+    {
+        write(cs_fd, buf_out, n);
+        bzero(buf_out, 255);
     }
 
-    close(cs);
+    char *m2;
+    int si;
+
+    msg_len = read(cs_fd, message, sizeof(message)-1);
+    cout << message << endl;
+
+    // int i = 0;
+    // string s;
+    // while(true)
+    // {
+    //     sleep(1);
+    //     s = to_string(i++);
+    //     s += "\n";
+    //     write(cs_fd, s.c_str(), s.length());
+    //     if(i==5) break;
+    // }
+    
+    write(cs_fd, "hi yolo\n", 8);
+
+    // string input;
+    // while(true)
+    // {
+    //     cin >> input;
+    //     if(input == "exit") break;
+    //     input += "\r\n";
+    //     write(cs_fd, input.c_str(), input.length());
+    //     cout << "message sent: " << input << endl;
+    // }
+
+    if (shutdown(cs_fd, SHUT_RDWR) == 0)
+        cout << "shutdown complete" << endl;
+    shutdown(ss_fd, SHUT_RDWR);
+    close(cs_fd);
+    close(ss_fd);
+    close(fd);
+    cout << "all sockets closed!" << endl;
 
     return 0;
 }
@@ -63,7 +130,7 @@ void endian_test()
 }
 
 
-int create_listening_socket(int port, string ip)
+int create_listening_socket(sockaddr_in *myaddr, int port, string ip)
 {
     /*
      * int socket(int domain, int type, int protocol);
@@ -82,10 +149,14 @@ int create_listening_socket(int port, string ip)
      *  Protocol value for Internet Protocol(IP)
      *  This is the same number which appears on protocol field in the IP header of a packet.
      */
-    int s = socket(PF_INET, SOCK_STREAM, 0);
-    if (s == -1)
+    int ss = socket(PF_INET, SOCK_STREAM, 0);
+    if (ss == -1)
+    {
+        cout << "failed to create socket" << endl;
         return -1; // socket creation fail
-    sockaddr_in *myaddr = new sockaddr_in();
+    }
+
+    // sockaddr_in *myaddr = new sockaddr_in();
     /*
      * sockaddr_in
      *
@@ -102,10 +173,16 @@ int create_listening_socket(int port, string ip)
      * 
      * :: sin_zero ::
      */
+
+    memset(myaddr->sin_zero, 0, sizeof(myaddr->sin_zero));
     myaddr->sin_family = AF_INET;
     myaddr->sin_port = htons(port);
-    myaddr->sin_addr.s_addr = inet_addr(ip.c_str());
-    memset(myaddr->sin_zero, 0, sizeof(myaddr->sin_zero));
+    myaddr->sin_len = sizeof(*myaddr);      // not sure
+    // myaddr->sin_addr.s_addr = inet_addr(ip.c_str());
+    myaddr->sin_addr.s_addr = htonl(INADDR_ANY);
+    // inet_addr();
+    // inet_aton();
+
 
     /*
      * int bind(int sockfd, struct sockaddr *myaddr, socklen_t addrlen);
@@ -119,8 +196,9 @@ int create_listening_socket(int port, string ip)
      * :: addrlen
      *  what is this?
      */
-    if (bind(s, (struct sockaddr *)myaddr, sizeof(myaddr)) == -1)   // ignore red wiggly line
+    if (bind(ss, (sockaddr *)myaddr, sizeof(*myaddr)) == -1)   // ignore red wiggly line
     {
+        cout << "failed to bind socket" << endl;
         return -1; // socket bind fail
     }
 
@@ -133,8 +211,9 @@ int create_listening_socket(int port, string ip)
      *  specifies the number of pending connections the queue will hold.
      *
      */
-    if (listen(s, 5) == -1)
+    if (listen(ss, 5) == -1)
     {
+        cout << "failed to listen socket" << endl;
         return -1; // socket listen fail
     }
 
@@ -152,5 +231,5 @@ int create_listening_socket(int port, string ip)
      *
      */
 
-    return s;
+    return ss;
 }
